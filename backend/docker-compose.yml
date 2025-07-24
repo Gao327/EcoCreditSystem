@@ -1,0 +1,146 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0
+    container_name: step-credit-mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: step-credit
+    volumes:
+      - mongodb_data:/data/db
+      - ./scripts/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    networks:
+      - step-credit-network
+
+  # Redis Cache
+  redis:
+    image: redis:7.2-alpine
+    container_name: step-credit-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - step-credit-network
+
+  # API Gateway
+  gateway:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    container_name: step-credit-gateway
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - GATEWAY_PORT=3000
+      - MONGODB_URI=mongodb://admin:password@mongodb:27017/step-credit?authSource=admin
+      - REDIS_URL=redis://redis:6379
+      - STEP_TRACKER_URL=http://step-tracker:3001
+      - CREDIT_SYSTEM_URL=http://credit-system:3002
+      - PAYMENT_URL=http://payment:3003
+      - USER_SERVICE_URL=http://user-service:3004
+    depends_on:
+      - mongodb
+      - redis
+      - step-tracker
+      - credit-system
+      - payment
+    networks:
+      - step-credit-network
+
+  # Step Tracker Service
+  step-tracker:
+    build:
+      context: .
+      dockerfile: services/step-tracker/Dockerfile
+    container_name: step-credit-step-tracker
+    restart: always
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - STEP_TRACKER_PORT=3001
+      - MONGODB_URI=mongodb://admin:password@mongodb:27017/step-credit?authSource=admin
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - step-credit-network
+
+  # Credit System Service
+  credit-system:
+    build:
+      context: .
+      dockerfile: services/credit-system/Dockerfile
+    container_name: step-credit-credit-system
+    restart: always
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=development
+      - CREDIT_SYSTEM_PORT=3002
+      - MONGODB_URI=mongodb://admin:password@mongodb:27017/step-credit?authSource=admin
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - step-credit-network
+
+  # Payment Service
+  payment:
+    build:
+      context: .
+      dockerfile: services/payment/Dockerfile
+    container_name: step-credit-payment
+    restart: always
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=development
+      - PAYMENT_PORT=3003
+      - MONGODB_URI=mongodb://admin:password@mongodb:27017/step-credit?authSource=admin
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - step-credit-network
+
+  # MongoDB Admin Interface (optional)
+  mongo-express:
+    image: mongo-express:1.0.0-alpha
+    container_name: step-credit-mongo-express
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: password
+      ME_CONFIG_MONGODB_URL: mongodb://admin:password@mongodb:27017/
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin
+    depends_on:
+      - mongodb
+    networks:
+      - step-credit-network
+
+volumes:
+  mongodb_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  step-credit-network:
+    driver: bridge 
