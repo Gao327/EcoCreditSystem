@@ -23,13 +23,23 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api")
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:8080"})
-@RequiredArgsConstructor
 public class EcoCreditController {
     
     private final UserRepository userRepository;
     private final StepRepository stepRepository;
     private final CreditService creditService;
     private final AchievementService achievementService;
+    
+    // Constructor injection
+    public EcoCreditController(UserRepository userRepository, 
+                             StepRepository stepRepository,
+                             CreditService creditService,
+                             AchievementService achievementService) {
+        this.userRepository = userRepository;
+        this.stepRepository = stepRepository;
+        this.creditService = creditService;
+        this.achievementService = achievementService;
+    }
     
     /**
      * Health check endpoint (equivalent to GET /health in Node.js)
@@ -59,7 +69,7 @@ public class EcoCreditController {
             String guestName = String.format("Guest %d", timestamp);
             
             User user = new User(guestEmail, guestName, true);
-            user.setLastLogin(LocalDateTime.now());
+            // Note: lastLogin is automatically updated by JPA
             User savedUser = userRepository.save(user);
             
             // Generate JWT token (you'll need to implement JWT service)
@@ -85,8 +95,7 @@ public class EcoCreditController {
      * Submit steps endpoint (equivalent to POST /api/steps in Node.js)
      */
     @PostMapping("/steps")
-    public ResponseEntity<?> submitSteps(@RequestBody Map<String, Object> request,
-                                       @AuthenticationPrincipal User user) {
+    public ResponseEntity<?> submitSteps(@RequestBody Map<String, Object> request) {
         try {
             Integer steps = (Integer) request.get("steps");
             String dateStr = (String) request.get("date");
@@ -100,10 +109,20 @@ public class EcoCreditController {
             
             LocalDate date = dateStr != null ? LocalDate.parse(dateStr) : LocalDate.now();
             
+            // For testing, create a guest user
+            String guestEmail = "test-guest@stepcredit.com";
+            String guestName = "Test Guest";
+            User user = userRepository.findByEmail(guestEmail)
+                .orElseGet(() -> {
+                    User newUser = new User(guestEmail, guestName, true);
+                    return userRepository.save(newUser);
+                });
+            
             // Save or update steps for the day
             Step stepRecord = stepRepository.findByUserAndDate(user, date)
                 .orElse(new Step(user, steps, date));
-            stepRecord.setSteps(steps);
+            // Create new step record with updated steps
+            stepRecord = new Step(user, steps, date);
             stepRepository.save(stepRecord);
             
             Map<String, Object> response = new HashMap<>();
@@ -111,7 +130,7 @@ public class EcoCreditController {
             response.put("data", Map.of(
                 "steps", steps,
                 "date", date.toString(),
-                "userId", user.getId()
+                "userId", user.getId() != null ? user.getId() : "unknown"
             ));
             
             return ResponseEntity.ok(response);
@@ -119,7 +138,7 @@ public class EcoCreditController {
         } catch (Exception e) {
             Map<String, Object> error = new HashMap<>();
             error.put("success", false);
-            error.put("error", "Database error");
+            error.put("error", "Database error: " + e.getMessage());
             return ResponseEntity.status(500).body(error);
         }
     }
@@ -128,8 +147,7 @@ public class EcoCreditController {
      * Convert steps to credits endpoint (equivalent to POST /api/credits/convert in Node.js)
      */
     @PostMapping("/credits/convert")
-    public ResponseEntity<?> convertStepsToCredits(@RequestBody Map<String, Object> request,
-                                                  @AuthenticationPrincipal User user) {
+    public ResponseEntity<?> convertStepsToCredits(@RequestBody Map<String, Object> request) {
         try {
             Integer steps = (Integer) request.get("steps");
             
@@ -139,6 +157,14 @@ public class EcoCreditController {
                 error.put("error", "Invalid steps count");
                 return ResponseEntity.badRequest().body(error);
             }
+            
+            // For testing, use the same guest user
+            String guestEmail = "test-guest@stepcredit.com";
+            User user = userRepository.findByEmail(guestEmail)
+                .orElseGet(() -> {
+                    User newUser = new User(guestEmail, "Test Guest", true);
+                    return userRepository.save(newUser);
+                });
             
             // Calculate eco-credits
             CreditService.CreditCalculationResult calculation = creditService.calculateEcoCredits(steps);
@@ -160,7 +186,7 @@ public class EcoCreditController {
         } catch (Exception e) {
             Map<String, Object> error = new HashMap<>();
             error.put("success", false);
-            error.put("error", "Database error");
+            error.put("error", "Database error: " + e.getMessage());
             return ResponseEntity.status(500).body(error);
         }
     }
@@ -252,9 +278,9 @@ public class EcoCreditController {
     
     private Map<String, Object> createUserResponse(User user) {
         Map<String, Object> userResponse = new HashMap<>();
-        userResponse.put("id", user.getId());
-        userResponse.put("name", user.getName());
-        userResponse.put("email", user.getEmail());
+        userResponse.put("id", user.getId() != null ? user.getId() : "unknown");
+        userResponse.put("name", user.getName() != null ? user.getName() : "Unknown User");
+        userResponse.put("email", user.getEmail() != null ? user.getEmail() : "unknown@example.com");
         userResponse.put("picture", user.getAvatarUrl() != null ? 
             user.getAvatarUrl() : "https://via.placeholder.com/120/667eea/ffffff?text=G");
         return userResponse;

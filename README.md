@@ -1,338 +1,202 @@
 
 # 🌱 EcoCredit System - Green Living Promotion Platform
 
-A comprehensive platform that promotes sustainable living by rewarding eco-friendly behaviors. The system converts various green activities (starting with step tracking) into credits that users can redeem for rewards, encouraging a more sustainable lifestyle.
+A comprehensive platform that promotes sustainable living through gamification, starting with step tracking and eco-credit conversion.
 
-## 🌍 **Project Overview**
+## 🎯 **Project Overview**
 
-The **EcoCredit System** is designed to motivate users towards sustainable living through gamification. While step tracking is the initial feature (as it's the simplest to implement), the system is architected to support various green activities:
+EcoCredit is a green living promotion system that encourages users to adopt sustainable habits. The system tracks user activities (starting with sustainable transportation steps) and converts them into eco-credits, which can be used for various green initiatives and rewards.
 
-- **Step Tracking** 🚶‍♂️ - Encourages walking/cycling instead of driving
-- **Future Features** - Energy conservation, waste reduction, sustainable shopping, etc.
-- **Credit System** 💚 - Converts green activities into redeemable credits
-- **Achievement System** 🏆 - Gamifies sustainable behaviors
-- **Community Features** 👥 - Social sharing and challenges (planned)
-
-## ✨ **Key Features**
-
-### 🌱 **Green Activity Tracking**
-- **Step Conversion**: Convert daily steps into eco-credits
-- **Smart Algorithm**: Rewards sustainable transportation choices
-- **Goal Setting**: Personalized daily/weekly green activity targets
-
-### 💚 **Eco-Credit System**
-- **Activity Conversion**: Transform green behaviors into credits
-- **Bonus Rewards**: Extra credits for milestone achievements
-- **Credit Balance**: Track and manage your eco-credit wallet
-
-### 🏆 **Achievement System**
-- **Green Milestones**: Unlock achievements for sustainable behaviors
-- **Progressive Rewards**: Earn more credits as you advance
-- **Badge Collection**: Visual representation of your green journey
-
-### 🔐 **User Management**
-- **Google OAuth**: Secure login with Google accounts
-- **Guest Access**: Try the system without registration
-- **Profile Management**: Track your green living progress
+### **🌍 Environmental Impact**
+- **Step Tracking**: Encourages walking and cycling (reducing carbon footprint)
+- **Eco-Credits**: Gamified rewards for sustainable behavior
+- **Achievement System**: Motivates continued participation in green activities
+- **Future Features**: Recycling tracking, energy conservation, sustainable shopping
 
 ## 🏗️ **Architecture**
 
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Web Frontend  │    │  Mobile App     │    │   API Gateway   │
-│   (HTML/CSS/JS) │    │  (React Native) │    │   (Express.js)  │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                                │                       │
-                                └───────────────────────┼───┐
-                                                        │   │
-                                ┌───────────────────────┼───┘
-                                │                       │
-                        ┌───────▼────────┐    ┌─────────▼────────┐
-                        │  Green Activity│    │   Eco-Credit     │
-                        │   Tracker      │    │    System        │
-                        │  (Step Data)   │    │  (Credits/Rewards)│
-                        └────────────────┘    └──────────────────┘
-                                │                       │
-                                └───────────────────────┼───┐
-                                                        │   │
-                                ┌───────────────────────┼───┘
-                                │                       │
-                        ┌───────▼───────────────────────▼────────┐
-                        │           SQLite Database              │
-                        │     (Users, Activities, Credits)       │
-                        └────────────────────────────────────────┘
-```
+### **Backend: Java Spring Boot**
+- **Framework**: Spring Boot 3.2.0 with Java 17
+- **Database**: H2 (development) / MySQL (production)
+- **Port**: 8081 (configurable)
+- **Features**: RESTful APIs, JWT authentication, achievement system
+
+### **Frontend: Web Interface**
+- **Technology**: HTML/CSS/JavaScript
+- **Features**: Step tracking, credit conversion, achievement display
+- **Access**: Browser-based interface
 
 ## 🚀 **Quick Start**
 
-### Prerequisites
-- Node.js (v16 or higher)
-- npm or yarn
+### **Prerequisites**
+- Java 17 or higher
+- Maven 3.6+
+- Git
 
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/Gao327/EcoCreditSystem.git
-   cd EcoCreditSystem
-   ```
-
-2. **Install dependencies**
-   ```bash
-   cd backend
-   npm install
-   ```
-
-3. **Start the server**
-   ```bash
-   node server-with-auth.js
-   ```
-
-4. **Open the application**
-   - Navigate to `http://localhost:3000/app-with-auth.html`
-   - Or open `backend/app-with-auth.html` in your browser
-
-## 🧪 **Testing the Application**
-
-### 1. **Guest Login (Quick Test)**
+### **1. Clone and Setup**
 ```bash
-# Start the server
-cd backend && node server-with-auth.js
-
-# Open in browser: http://localhost:3000/app-with-auth.html
-# Click "Continue as Guest" to test immediately
+git clone <your-repo-url>
+cd "huawei comp"
 ```
 
-### 2. **Google OAuth Login**
-- Click "Sign in with Google" 
-- Complete Google authentication
-- Your green activity data will be saved permanently
+### **2. Start the Java Backend**
+```bash
+cd backend-java
+mvn spring-boot:run
+```
 
-### 3. **API Testing with curl**
+The application will start on **http://localhost:8081**
+
+### **3. Test the API**
 ```bash
 # Health check
-curl http://localhost:3000/health
+curl http://localhost:8081/api/health
 
 # Guest login
-curl -X POST http://localhost:3000/api/auth/guest \
+curl -X POST http://localhost:8081/api/auth/guest \
   -H "Content-Type: application/json" \
-  -d '{"deviceId": "test-device-123"}'
+  -d '{"deviceId":"test-device"}'
 
-# Submit green activity (steps)
-curl -X POST http://localhost:3000/api/steps \
+# Submit steps
+curl -X POST http://localhost:8081/api/steps \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_TOKEN" \
-  -d '{"steps": 8500, "date": "2024-01-15"}'
+  -d '{"steps": 5000}'
 
-# Convert activities to eco-credits
-curl -X POST http://localhost:3000/api/credits/convert \
-  -H "Authorization: Bearer YOUR_TOKEN"
-
-# Check credit balance
-curl http://localhost:3000/api/credits/balance \
-  -H "Authorization: Bearer YOUR_TOKEN"
-
-# Get user profile with green activity stats
-curl http://localhost:3000/api/user/profile \
-  -H "Authorization: Bearer YOUR_TOKEN"
+# Convert to credits
+curl -X POST http://localhost:8081/api/credits/convert \
+  -H "Content-Type: application/json" \
+  -d '{"steps": 5000}'
 ```
 
-## 🌱 **Green Activity Algorithm**
+### **4. Access Web Interface**
+Open **http://localhost:8081** in your browser to access the web interface.
 
-The system uses a sophisticated algorithm to convert green activities into eco-credits:
+## 📊 **API Endpoints**
 
-### **Step Conversion Formula**
-```javascript
-// Base credits: 1 credit per 100 steps
-const baseCredits = Math.floor(steps / 100);
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/health` | GET | Health check |
+| `/api/auth/guest` | POST | Guest user login |
+| `/api/steps` | POST | Submit daily steps |
+| `/api/credits/convert` | POST | Convert steps to eco-credits |
+| `/api/credits/balance` | GET | Get user's credit balance |
+| `/api/user/profile` | GET | Get user profile and stats |
+| `/api/achievements` | GET | Get user achievements |
 
-// Bonus credits for sustainable transportation milestones
-let bonusCredits = 0;
-if (steps >= 10000) bonusCredits += 50;  // Daily goal bonus
-else if (steps >= 5000) bonusCredits += 25;   // Halfway bonus
-else if (steps >= 1000) bonusCredits += 10;   // Getting started bonus
+## 🌱 **Eco-Credit System**
 
-// Total eco-credits earned
-const totalCredits = baseCredits + bonusCredits;
+### **Credit Calculation**
+- **Base Rate**: 1 eco-credit per 100 steps
+- **Bonus Credits**: 
+  - 10 credits for 1,000+ steps (Getting started)
+  - 25 credits for 5,000+ steps (Halfway goal)
+  - 50 credits for 10,000+ steps (Daily sustainable goal)
+
+### **Achievements**
+- 🌱 **First Steps**: Complete 100 steps
+- 🚶‍♂️ **Green Walker**: Walk 1,000 steps in a day
+- 🏃‍♀️ **Eco Stepper**: Walk 5,000 steps in a day
+- 🏆 **Sustainable Champion**: Reach 10,000 steps in a day
+
+## 🔧 **Configuration**
+
+### **Port Configuration**
+The application runs on port 8081 by default. To change it:
+
+```properties
+# In application.properties
+server.port=8081
 ```
 
-### **Why Steps Matter for Green Living**
-- **Reduced Carbon Footprint**: Walking/cycling instead of driving
-- **Health Benefits**: Encourages active transportation
-- **Community Impact**: Less traffic congestion and pollution
-- **Measurable Impact**: Easy to track and quantify
+### **Database Configuration**
+- **Development**: H2 in-memory database (default)
+- **Production**: MySQL database
 
-## 🏗️ **Architecture Details**
-
-### **Backend Services**
-- **Express.js Server**: RESTful API with JWT authentication
-- **SQLite Database**: Lightweight, persistent data storage
-- **Google OAuth**: Secure user authentication
-- **Credit System**: Activity-to-credit conversion engine
-
-### **Frontend Components**
-- **Responsive Web App**: Works on desktop and mobile
-- **Modern UI**: Glass-morphism design with green theme
-- **Real-time Updates**: Live activity and credit tracking
-- **Progressive Web App**: Can be installed on mobile devices
-
-### **Database Schema**
-```sql
--- Users table
-CREATE TABLE users (
-  id INTEGER PRIMARY KEY,
-  google_id TEXT UNIQUE,
-  email TEXT,
-  name TEXT,
-  avatar_url TEXT,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
--- Green activities table
-CREATE TABLE steps (
-  id INTEGER PRIMARY KEY,
-  user_id INTEGER,
-  steps INTEGER,
-  date DATE,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id)
-);
-
--- Eco-credits table
-CREATE TABLE credits (
-  id INTEGER PRIMARY KEY,
-  user_id INTEGER,
-  amount INTEGER,
-  source TEXT,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id)
-);
-
--- Achievements table
-CREATE TABLE achievements (
-  id INTEGER PRIMARY KEY,
-  user_id INTEGER,
-  type TEXT,
-  title TEXT,
-  description TEXT,
-  earned_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id)
-);
+```properties
+# For MySQL production
+spring.datasource.url=jdbc:mysql://localhost:3306/ecocredit
+spring.datasource.username=your_username
+spring.datasource.password=your_password
 ```
 
-## 🔌 **API Endpoints**
+## 🛠️ **Development**
 
-### **Authentication**
-- `POST /api/auth/google` - Google OAuth login
-- `POST /api/auth/guest` - Guest login
-
-### **Green Activities**
-- `POST /api/steps` - Submit daily step count
-- `GET /api/steps/today/:userId` - Get today's steps
-
-### **Eco-Credits**
-- `POST /api/credits/convert` - Convert activities to credits
-- `GET /api/credits/balance` - Get current credit balance
-
-### **User Management**
-- `GET /api/user/profile` - Get user profile with stats
-- `GET /api/achievements` - Get user achievements
-
-## ⚙️ **Configuration**
-
-### **Environment Variables**
-Create a `.env` file in the backend directory:
-```env
-PORT=3000
-JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
-GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
+### **Project Structure**
+```
+backend-java/
+├── src/main/java/com/ecocredit/
+│   ├── controller/     # REST API endpoints
+│   ├── service/        # Business logic
+│   ├── repository/     # Database operations
+│   ├── model/          # Data entities
+│   └── config/         # Configuration classes
+├── src/main/resources/
+│   └── application.properties
+└── pom.xml
 ```
 
-### **Google OAuth Setup**
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project or select existing
-3. Enable Google+ API
-4. Create OAuth 2.0 credentials
-5. Add authorized origins: `http://localhost:3000`
-6. Update `GOOGLE_CLIENT_ID` in your `.env` file
+### **Key Files to Modify**
+- **Credit Calculation**: `CreditService.java`
+- **Achievement Logic**: `AchievementService.java`
+- **API Endpoints**: `EcoCreditController.java`
+- **Database Schema**: Model classes in `model/` package
 
-## 🔒 **Security Features**
+### **Adding New Features**
+1. Create entity in `model/` package
+2. Add repository interface in `repository/` package
+3. Implement business logic in `service/` package
+4. Add API endpoints in `controller/` package
 
-- **JWT Authentication**: Secure token-based authentication
-- **Google OAuth**: Industry-standard OAuth 2.0
-- **Input Validation**: All user inputs are validated
-- **SQL Injection Protection**: Parameterized queries
-- **CORS Configuration**: Proper cross-origin resource sharing
+## 🌟 **Future Green Activities**
 
-## 🏆 **Achievement System**
+The system is designed to expand beyond step tracking:
 
-### **Current Achievements**
-- **🌱 First Steps**: Complete your first 1,000 steps
-- **🚶‍♂️ Halfway There**: Reach 5,000 steps in a day
-- **🏃‍♂️ Daily Goal**: Achieve 10,000 steps in a day
-- **💚 Green Warrior**: Earn your first 100 eco-credits
-- **🌟 Credit Collector**: Accumulate 500 total credits
+### **Planned Features**
+- **Recycling Tracker**: Track recycling activities
+- **Energy Conservation**: Monitor energy usage
+- **Sustainable Shopping**: Track eco-friendly purchases
+- **Community Challenges**: Group sustainability goals
+- **Carbon Footprint Calculator**: Estimate environmental impact
 
-### **Future Achievement Ideas**
-- **🌿 Weekly Streak**: 7 consecutive days of green activities
-- **🚲 Bike Commuter**: Track cycling activities
-- **♻️ Waste Warrior**: Log recycling activities
-- **🌱 Plant Parent**: Document plant care activities
-- **💡 Energy Saver**: Track energy conservation activities
+### **Integration Possibilities**
+- **Smart Home Devices**: IoT integration for energy tracking
+- **Wearable Devices**: Direct step data integration
+- **Retail Partners**: Sustainable shopping rewards
+- **Environmental Organizations**: Real-world impact tracking
 
-## 🌐 **Browser Compatibility**
+## 📈 **Environmental Impact Goals**
 
-- **Chrome**: 90+ ✅
-- **Firefox**: 88+ ✅
-- **Safari**: 14+ ✅
-- **Edge**: 90+ ✅
-- **Mobile Browsers**: iOS Safari, Chrome Mobile ✅
+### **Short-term (3 months)**
+- 1,000+ active users
+- 1 million+ steps tracked
+- 10,000+ eco-credits earned
 
-## 🚀 **Future Enhancements**
+### **Medium-term (6 months)**
+- 5,000+ active users
+- 5 million+ steps tracked
+- 50,000+ eco-credits earned
+- Introduction of recycling tracking
 
-### **Planned Green Activities**
-- **🚲 Cycling Tracking**: Convert bike rides to credits
-- **♻️ Recycling Logging**: Document recycling activities
-- **💡 Energy Conservation**: Track electricity/water savings
-- **🌱 Sustainable Shopping**: Log eco-friendly purchases
-- **🚶‍♂️ Public Transport**: Track bus/train usage
-
-### **Community Features**
-- **👥 Green Challenges**: Community-wide sustainability goals
-- **🏆 Leaderboards**: Compare green living progress
-- **📱 Social Sharing**: Share achievements on social media
-- **🌍 Impact Visualization**: Show environmental impact
-
-### **Advanced Features**
-- **📊 Analytics Dashboard**: Detailed green living insights
-- **🎯 Personalized Goals**: AI-driven activity recommendations
-- **🌱 Carbon Footprint Calculator**: Environmental impact tracking
-- **💚 Credit Marketplace**: Redeem credits for eco-friendly rewards
+### **Long-term (1 year)**
+- 20,000+ active users
+- 20 million+ steps tracked
+- 200,000+ eco-credits earned
+- Full feature set with multiple green activities
 
 ## 🤝 **Contributing**
 
-We welcome contributions to make the world greener! 
-
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/green-activity`)
-3. Commit your changes (`git commit -am 'Add new green activity tracking'`)
-4. Push to the branch (`git push origin feature/green-activity`)
-5. Create a Pull Request
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
 ## 📄 **License**
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🌍 **Environmental Impact**
-
-By encouraging sustainable behaviors through gamification, the EcoCredit System aims to:
-- **Reduce Carbon Footprints**: Promote walking/cycling over driving
-- **Increase Awareness**: Educate users about sustainable living
-- **Build Communities**: Connect like-minded environmentalists
-- **Drive Change**: Make green living accessible and rewarding
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ---
 
-**🌱 Start your green living journey today! Every step counts towards a more sustainable future.** 🌍 
+**🌱 Together, we can make sustainable living fun and rewarding!** 
 
 

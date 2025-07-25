@@ -11,10 +11,14 @@ import java.util.List;
 import java.util.ArrayList;
 
 @Service
-@RequiredArgsConstructor
 public class AchievementService {
     
     private final AchievementRepository achievementRepository;
+    
+    // Constructor injection
+    public AchievementService(AchievementRepository achievementRepository) {
+        this.achievementRepository = achievementRepository;
+    }
     
     /**
      * Check and unlock green living achievements (equivalent to checkAchievements in Node.js)
@@ -61,8 +65,8 @@ public class AchievementService {
                     Achievement savedAchievement = achievementRepository.save(achievement);
                     newAchievements.add(savedAchievement);
                     
-                    System.out.printf("🏆 Achievement unlocked for user %d: %s%n", 
-                                    user.getId(), criteria.name);
+                    System.out.printf("🏆 Achievement unlocked for user %s: %s%n", 
+                                    user.getId() != null ? user.getId().toString() : "unknown", criteria.name);
                 }
             }
         }

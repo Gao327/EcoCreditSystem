@@ -1,0 +1,17 @@
+com/ecocredit/repository/StepRepository.class
+com/ecocredit/config/SecurityConfig.class
+com/ecocredit/EcoCreditApplication.class
+com/ecocredit/repository/AchievementRepository.class
+com/ecocredit/service/AchievementService.class
+com/ecocredit/repository/CreditRepository.class
+com/ecocredit/model/Step.class
+com/ecocredit/service/CreditService$CreditCalculationResult.class
+com/ecocredit/model/User.class
+com/ecocredit/repository/UserRepository.class
+com/ecocredit/service/CreditService.class
+com/ecocredit/model/Credit.class
+com/ecocredit/repository/UserRepository$UserStatsProjection.class
+com/ecocredit/service/CreditService$CreditBalance.class
+com/ecocredit/controller/EcoCreditController.class
+com/ecocredit/model/Achievement.class
+com/ecocredit/service/AchievementService$AchievementCriteria.class

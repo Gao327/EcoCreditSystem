@@ -11,10 +11,14 @@ import java.util.Map;
 import java.util.HashMap;
 
 @Service
-@RequiredArgsConstructor
 public class CreditService {
     
     private final CreditRepository creditRepository;
+    
+    // Constructor injection
+    public CreditService(CreditRepository creditRepository) {
+        this.creditRepository = creditRepository;
+    }
     
     /**
      * Convert steps to eco-credits (equivalent to calculateEcoCredits in Node.js)

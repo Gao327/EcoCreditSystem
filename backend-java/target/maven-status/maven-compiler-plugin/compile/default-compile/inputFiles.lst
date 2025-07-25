@@ -1,0 +1,13 @@
+/Users/gaoyening/huawei comp/backend-java/src/main/java/com/ecocredit/controller/EcoCreditController.java
+/Users/gaoyening/huawei comp/backend-java/src/main/java/com/ecocredit/EcoCreditApplication.java
+/Users/gaoyening/huawei comp/backend-java/src/main/java/com/ecocredit/model/Credit.java
+/Users/gaoyening/huawei comp/backend-java/src/main/java/com/ecocredit/model/Step.java
+/Users/gaoyening/huawei comp/backend-java/src/main/java/com/ecocredit/service/AchievementService.java
+/Users/gaoyening/huawei comp/backend-java/src/main/java/com/ecocredit/service/CreditService.java
+/Users/gaoyening/huawei comp/backend-java/src/main/java/com/ecocredit/repository/AchievementRepository.java
+/Users/gaoyening/huawei comp/backend-java/src/main/java/com/ecocredit/repository/CreditRepository.java
+/Users/gaoyening/huawei comp/backend-java/src/main/java/com/ecocredit/repository/StepRepository.java
+/Users/gaoyening/huawei comp/backend-java/src/main/java/com/ecocredit/config/SecurityConfig.java
+/Users/gaoyening/huawei comp/backend-java/src/main/java/com/ecocredit/model/User.java
+/Users/gaoyening/huawei comp/backend-java/src/main/java/com/ecocredit/repository/UserRepository.java
+/Users/gaoyening/huawei comp/backend-java/src/main/java/com/ecocredit/model/Achievement.java
