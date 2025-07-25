@@ -306,7 +306,7 @@ app.post('/api/steps', authenticateToken, (req, res) => {
   );
 });
 
-// Convert steps to credits
+// Convert green activities (steps) to eco-credits
 app.post('/api/credits/convert', authenticateToken, (req, res) => {
   const { steps } = req.body;
   const userId = req.user.userId;
@@ -315,26 +315,27 @@ app.post('/api/credits/convert', authenticateToken, (req, res) => {
     return res.status(400).json({ error: 'Invalid steps count' });
   }
 
-  // Calculate credits
-  const baseCredits = Math.floor(steps / 100);
+  // Calculate eco-credits for sustainable transportation
+  const baseCredits = Math.floor(steps / 100); // 1 eco-credit per 100 steps
   let bonusCredits = 0;
   
-  if (steps >= 10000) bonusCredits = 50;
-  else if (steps >= 5000) bonusCredits = 25;
-  else if (steps >= 1000) bonusCredits = 10;
+  // Bonus eco-credits for sustainable living milestones
+  if (steps >= 10000) bonusCredits = 50;  // Daily sustainable transportation goal
+  else if (steps >= 5000) bonusCredits = 25;   // Halfway to sustainable daily goal
+  else if (steps >= 1000) bonusCredits = 10;   // Getting started with green living
 
   const totalCredits = baseCredits + bonusCredits;
 
-  // Save credits to database
+  // Save eco-credits to database
   db.run(
     'INSERT INTO credits (user_id, amount, type, description) VALUES (?, ?, ?, ?)',
-    [userId, totalCredits, 'earned', `Converted ${steps} steps`],
+    [userId, totalCredits, 'earned', `Converted ${steps} steps of sustainable transportation`],
     function(err) {
       if (err) {
         return res.status(500).json({ error: 'Database error' });
       }
 
-      // Check for achievements
+      // Check for green living achievements
       checkAchievements(userId, steps, totalCredits);
 
       res.json({
@@ -343,8 +344,8 @@ app.post('/api/credits/convert', authenticateToken, (req, res) => {
           baseCredits,
           bonusCredits,
           totalCredits,
-          stepGoalProgress: Math.min(steps / 10000, 1) * 100,
-          message: `Converted ${steps} steps into ${totalCredits} credits!`
+          sustainableGoalProgress: Math.min(steps / 10000, 1) * 100,
+          message: `Converted ${steps} steps of sustainable transportation into ${totalCredits} eco-credits!`
         }
       });
     }
@@ -398,13 +399,13 @@ app.get('/api/achievements', authenticateToken, (req, res) => {
   );
 });
 
-// Check and unlock achievements
+// Check and unlock green living achievements
 function checkAchievements(userId, steps, credits) {
   const achievements = [
-    { type: 'first_steps', condition: steps >= 100, name: 'First Steps', description: 'Complete your first 100 steps' },
-    { type: 'walker', condition: steps >= 1000, name: 'Walker', description: 'Walk 1,000 steps in a day' },
-    { type: 'stepper', condition: steps >= 5000, name: 'Stepper', description: 'Walk 5,000 steps in a day' },
-    { type: 'goal_crusher', condition: steps >= 10000, name: 'Goal Crusher', description: 'Reach the daily goal of 10,000 steps' },
+    { type: 'first_steps', condition: steps >= 100, name: '🌱 First Steps', description: 'Complete your first 100 steps of sustainable transportation' },
+    { type: 'walker', condition: steps >= 1000, name: '🚶‍♂️ Green Walker', description: 'Walk 1,000 steps in a day (reducing carbon footprint)' },
+    { type: 'stepper', condition: steps >= 5000, name: '🏃‍♀️ Eco Stepper', description: 'Walk 5,000 steps in a day (halfway to sustainable goal)' },
+    { type: 'goal_crusher', condition: steps >= 10000, name: '🏆 Sustainable Champion', description: 'Reach the daily sustainable transportation goal of 10,000 steps' },
   ];
 
   achievements.forEach(achievement => {
@@ -424,10 +425,11 @@ function checkAchievements(userId, steps, credits) {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Step Credit Server with Authentication running on http://localhost:${PORT}`);
+  console.log(`🌱 EcoCredit System - Green Living Platform running on http://localhost:${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/health`);
   console.log(`🔐 Authentication endpoints available`);
   console.log(`💾 SQLite database: stepcredit.db`);
+  console.log(`🌍 Promoting sustainable living through gamification!`);
 });
 
 // Graceful shutdown

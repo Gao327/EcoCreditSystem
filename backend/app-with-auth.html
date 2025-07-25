@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Step Credit - Fitness Rewards App</title>
+    <title>EcoCredit - Green Living Promotion Platform</title>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -476,7 +476,7 @@
         <!-- Navigation -->
         <nav class="nav" id="navigation" style="display: none;">
             <div class="nav-brand">
-                <i class="fas fa-running"></i> Step Credit
+                <i class="fas fa-leaf"></i> EcoCredit
             </div>
             <div class="nav-menu">
                 <button class="nav-item active" onclick="showPage('home')">
@@ -492,14 +492,14 @@
         <div id="loginPage" class="page active">
             <div class="login-container">
                 <div class="login-header">
-                    <h1><i class="fas fa-running"></i></h1>
-                    <h1>Step Credit</h1>
-                    <p>Turn your steps into rewards</p>
+                    <h1><i class="fas fa-leaf"></i></h1>
+                    <h1>EcoCredit</h1>
+                    <p>Promote sustainable living through green activities</p>
                     <ul class="feature-list">
-                        <li><i class="fas fa-check"></i> Track your daily steps</li>
-                        <li><i class="fas fa-check"></i> Earn credits for walking</li>
-                        <li><i class="fas fa-check"></i> Unlock achievements</li>
-                        <li><i class="fas fa-check"></i> Cross-device sync</li>
+                        <li><i class="fas fa-check"></i> Track sustainable transportation</li>
+                        <li><i class="fas fa-check"></i> Earn eco-credits for green activities</li>
+                        <li><i class="fas fa-check"></i> Unlock green living achievements</li>
+                        <li><i class="fas fa-check"></i> Reduce your carbon footprint</li>
                     </ul>
                 </div>
                 
@@ -542,10 +542,10 @@
                 <p class="user-greeting" id="userGreeting">Ready to earn some credits?</p>
             </div>
             
-            <!-- Steps Card -->
+            <!-- Green Activities Card -->
             <div class="card">
                 <div class="stats-display">
-                    <div class="stats-label">Today's Steps</div>
+                    <div class="stats-label">Today's Sustainable Steps</div>
                     <div class="stats-main" id="stepsValue">0</div>
                     <div class="progress-container">
                         <div class="progress-bar">
@@ -558,12 +558,12 @@
                 </div>
             </div>
 
-            <!-- Credits Card -->
+            <!-- Eco-Credits Card -->
             <div class="card">
                 <div class="stats-display">
-                    <div class="stats-label">Your Credits</div>
-                    <div class="stats-main" id="creditsValue" style="background: linear-gradient(135deg, #f59e0b, #d97706); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">0</div>
-                    <div class="progress-text">Earned by walking</div>
+                    <div class="stats-label">Your Eco-Credits</div>
+                    <div class="stats-main" id="creditsValue" style="background: linear-gradient(135deg, #10b981, #059669); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">0</div>
+                    <div class="progress-text">Earned through sustainable living</div>
                 </div>
             </div>
 
@@ -583,7 +583,7 @@
                 <i class="fas fa-dice"></i> Generate Random Steps
             </button>
             <button class="btn btn-success" onclick="convertSteps()" id="convertBtn">
-                <i class="fas fa-coins"></i> Convert Steps to Credits
+                <i class="fas fa-leaf"></i> Convert to Eco-Credits
             </button>
 
             <div id="status"></div>
@@ -613,24 +613,24 @@
                 <div class="profile-stats">
                     <div class="profile-stat">
                         <div class="profile-stat-value" id="totalStepsProfile">0</div>
-                        <div class="profile-stat-label">Total Steps</div>
+                        <div class="profile-stat-label">Total Sustainable Steps</div>
                     </div>
                     <div class="profile-stat">
                         <div class="profile-stat-value" id="totalCreditsProfile">0</div>
-                        <div class="profile-stat-label">Total Credits</div>
+                        <div class="profile-stat-label">Total Eco-Credits</div>
                     </div>
                 </div>
 
                 <div style="margin-top: 30px;">
                     <h3 style="margin-bottom: 15px; color: #1e293b;">
-                        <i class="fas fa-trophy"></i> Achievements
+                        <i class="fas fa-trophy"></i> Green Living Achievements
                     </h3>
                     <div id="achievementsList">
                         <div class="stat-item" style="margin-bottom: 10px; text-align: left; padding: 15px;">
                             <div style="display: flex; align-items: center; gap: 10px;">
-                                <span style="font-size: 24px;">🏃‍♂️</span>
+                                <span style="font-size: 24px;">🌱</span>
                                 <div>
-                                    <div style="font-weight: bold; color: #1e293b;">Loading achievements...</div>
+                                    <div style="font-weight: bold; color: #1e293b;">Loading green achievements...</div>
                                     <div style="font-size: 12px; color: #64748b;">Please wait</div>
                                 </div>
                             </div>
@@ -749,7 +749,7 @@
                     updateUserGreeting();
                     
                     if (data.isNewUser) {
-                        showStatus('🎉 Welcome to Step Credit! Your account has been created.', 'success');
+                        showStatus('🌱 Welcome to EcoCredit! Your green living journey begins.', 'success');
                     } else {
                         showStatus('✅ Welcome back! Your data has been loaded.', 'success');
                     }
@@ -899,7 +899,7 @@
                 showStatus('❌ Failed to convert credits. Please try again!', 'error');
             } finally {
                 convertBtn.disabled = false;
-                convertBtn.innerHTML = '<i class="fas fa-coins"></i> Convert Steps to Credits';
+                convertBtn.innerHTML = '<i class="fas fa-leaf"></i> Convert to Eco-Credits';
             }
         }
         
