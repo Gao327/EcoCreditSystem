@@ -6,12 +6,13 @@ import com.ecocredit.model.Credit;
 import com.ecocredit.model.Achievement;
 import com.ecocredit.service.CreditService;
 import com.ecocredit.service.AchievementService;
+import com.ecocredit.service.AuthenticationService;
 import com.ecocredit.repository.UserRepository;
 import com.ecocredit.repository.StepRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -19,26 +20,41 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import com.ecocredit.service.FileUploadService;
+import com.ecocredit.service.NotificationService;
+import com.ecocredit.service.GoogleOAuthService;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:8080"})
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:8080", "http://localhost:8081"})
 public class EcoCreditController {
     
     private final UserRepository userRepository;
     private final StepRepository stepRepository;
     private final CreditService creditService;
     private final AchievementService achievementService;
+    private final FileUploadService fileUploadService;
+    private final NotificationService notificationService;
+    private final GoogleOAuthService googleOAuthService;
+    private final AuthenticationService authenticationService;
     
     // Constructor injection
     public EcoCreditController(UserRepository userRepository, 
                              StepRepository stepRepository,
                              CreditService creditService,
-                             AchievementService achievementService) {
+                             AchievementService achievementService,
+                             FileUploadService fileUploadService,
+                             NotificationService notificationService,
+                             GoogleOAuthService googleOAuthService,
+                             AuthenticationService authenticationService) {
         this.userRepository = userRepository;
         this.stepRepository = stepRepository;
         this.creditService = creditService;
         this.achievementService = achievementService;
+        this.fileUploadService = fileUploadService;
+        this.notificationService = notificationService;
+        this.googleOAuthService = googleOAuthService;
+        this.authenticationService = authenticationService;
     }
     
     /**
@@ -72,8 +88,8 @@ public class EcoCreditController {
             // Note: lastLogin is automatically updated by JPA
             User savedUser = userRepository.save(user);
             
-            // Generate JWT token (you'll need to implement JWT service)
-            String token = generateJwtToken(savedUser);
+            // Generate token using authentication service
+            String token = authenticationService.generateToken(savedUser);
             
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
@@ -87,6 +103,65 @@ public class EcoCreditController {
             Map<String, Object> error = new HashMap<>();
             error.put("success", false);
             error.put("error", "Failed to create guest account");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
+     * Google OAuth sign-in endpoint
+     */
+    @PostMapping("/auth/google")
+    public ResponseEntity<?> googleSignIn(@RequestBody Map<String, String> request) {
+        try {
+            String idToken = request.get("idToken");
+            if (idToken == null) {
+                Map<String, Object> error = new HashMap<>();
+                error.put("success", false);
+                error.put("error", "No ID token provided");
+                return ResponseEntity.badRequest().body(error);
+            }
+            
+            // Verify Google ID token
+            Map<String, Object> userInfo = googleOAuthService.verifyGoogleToken(idToken);
+            if (userInfo == null) {
+                Map<String, Object> error = new HashMap<>();
+                error.put("success", false);
+                error.put("error", "Invalid Google ID token");
+                return ResponseEntity.badRequest().body(error);
+            }
+            
+            String googleId = (String) userInfo.get("googleId");
+            String email = (String) userInfo.get("email");
+            String name = (String) userInfo.get("name");
+            String picture = (String) userInfo.get("picture");
+            
+            // Check if user already exists
+            User user = userRepository.findByGoogleId(googleId)
+                .orElseGet(() -> {
+                    // Create new user
+                    User newUser = new User(googleId, email, name, picture);
+                    return userRepository.save(newUser);
+                });
+            
+            // Update last login
+            user.setLastLogin(LocalDateTime.now());
+            User savedUser = userRepository.save(user);
+            
+            // Generate token using authentication service
+            String token = authenticationService.generateToken(savedUser);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("token", token);
+            response.put("user", createUserResponse(savedUser));
+            response.put("isGuest", false);
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("error", "Google sign-in failed: " + e.getMessage());
             return ResponseEntity.status(500).body(error);
         }
     }
@@ -195,8 +270,9 @@ public class EcoCreditController {
      * Get credit balance endpoint (equivalent to GET /api/credits/balance in Node.js)
      */
     @GetMapping("/credits/balance")
-    public ResponseEntity<?> getCreditBalance(@AuthenticationPrincipal User user) {
+    public ResponseEntity<?> getCreditBalance() {
         try {
+            User user = authenticationService.getCurrentUser();
             CreditService.CreditBalance balance = creditService.getCreditBalance(user);
             
             Map<String, Object> response = new HashMap<>();
@@ -217,8 +293,9 @@ public class EcoCreditController {
      * Get user profile endpoint (equivalent to GET /api/user/profile in Node.js)
      */
     @GetMapping("/user/profile")
-    public ResponseEntity<?> getUserProfile(@AuthenticationPrincipal User user) {
+    public ResponseEntity<?> getUserProfile() {
         try {
+            User user = authenticationService.getCurrentUser();
             // Get user stats
             UserRepository.UserStatsProjection stats = userRepository.getUserStats(user);
             
@@ -251,8 +328,9 @@ public class EcoCreditController {
      * Get achievements endpoint (equivalent to GET /api/achievements in Node.js)
      */
     @GetMapping("/achievements")
-    public ResponseEntity<?> getAchievements(@AuthenticationPrincipal User user) {
+    public ResponseEntity<?> getAchievements() {
         try {
+            User user = authenticationService.getCurrentUser();
             List<Achievement> achievements = achievementService.getUserAchievements(user);
             
             Map<String, Object> response = new HashMap<>();
@@ -264,17 +342,126 @@ public class EcoCreditController {
         } catch (Exception e) {
             Map<String, Object> error = new HashMap<>();
             error.put("success", false);
-            error.put("error", "Database error");
+            error.put("error", "Database error: " + e.getMessage());
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
+     * Upload avatar endpoint
+     */
+    @PostMapping("/upload/avatar")
+    public ResponseEntity<?> uploadAvatar(@RequestParam("file") MultipartFile file) {
+        try {
+            if (file.isEmpty()) {
+                Map<String, Object> error = new HashMap<>();
+                error.put("success", false);
+                error.put("error", "No file uploaded");
+                return ResponseEntity.badRequest().body(error);
+            }
+            
+            // Upload file to local storage
+            String fileUrl = fileUploadService.uploadFile(file, "avatars");
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("url", fileUrl);
+            response.put("message", "Avatar uploaded successfully");
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("error", "Upload failed: " + e.getMessage());
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
+     * Upload achievement badge endpoint
+     */
+    @PostMapping("/upload/achievement-badge")
+    public ResponseEntity<?> uploadAchievementBadge(@RequestParam("file") MultipartFile file) {
+        try {
+            if (file.isEmpty()) {
+                Map<String, Object> error = new HashMap<>();
+                error.put("success", false);
+                error.put("error", "No file uploaded");
+                return ResponseEntity.badRequest().body(error);
+            }
+            
+            // Upload file to local storage
+            String fileUrl = fileUploadService.uploadFile(file, "achievements");
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("url", fileUrl);
+            response.put("message", "Achievement badge uploaded successfully");
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("error", "Upload failed: " + e.getMessage());
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
+     * Get notifications for user
+     */
+    @GetMapping("/notifications")
+    public ResponseEntity<?> getUserNotifications() {
+        try {
+            User user = authenticationService.getCurrentUser();
+            // For testing, use a guest user ID
+            Long userId = user.getId(); // In real app, get from authentication
+            
+            List<Map<String, Object>> notifications = notificationService.getUserNotifications(userId);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("notifications", notifications);
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("error", "Failed to get notifications: " + e.getMessage());
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
+     * Mark notification as read
+     */
+    @PostMapping("/notifications/{notificationId}/read")
+    public ResponseEntity<?> markNotificationAsRead(@PathVariable Long notificationId) {
+        try {
+            User user = authenticationService.getCurrentUser();
+            // For testing, use a guest user ID
+            Long userId = user.getId(); // In real app, get from authentication
+            
+            boolean success = notificationService.markNotificationAsRead(userId, notificationId);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", success);
+            response.put("message", "Notification marked as read");
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("error", "Failed to mark notification as read: " + e.getMessage());
             return ResponseEntity.status(500).body(error);
         }
     }
     
     // Helper methods
-    private String generateJwtToken(User user) {
-        // TODO: Implement JWT token generation
-        // This would use the JWT service to create a token
-        return "dummy-jwt-token-" + user.getId();
-    }
     
     private Map<String, Object> createUserResponse(User user) {
         Map<String, Object> userResponse = new HashMap<>();

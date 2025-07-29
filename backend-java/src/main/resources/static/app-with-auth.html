@@ -504,12 +504,13 @@
                 </div>
                 
                 <div class="card">
-                    <div id="g_id_onload"
-                         data-client_id="your-google-client-id.apps.googleusercontent.com"
+                            <div id="g_id_onload"
+             data-client_id="23728481880-mc7mc2krcpfg5ofcqn2b73l7isaag250.apps.googleusercontent.com"
                          data-context="signin"
                          data-ux_mode="popup"
                          data-callback="handleGoogleSignIn"
-                         data-auto_prompt="false">
+                         data-auto_prompt="false"
+                         data-redirect_uri="http://localhost:8081/">
                     </div>
                     
                     <div class="g_id_signin"
@@ -648,13 +649,25 @@
     <script>
         // Configuration
         const API_BASE = 'http://localhost:8081/api';
-        const GOOGLE_CLIENT_ID = 'your-google-client-id.apps.googleusercontent.com';
+        const GOOGLE_CLIENT_ID = '23728481880-mc7mc2krcpfg5ofcqn2b73l7isaag250.apps.googleusercontent.com'; // Replace with your actual Google Client ID
         
         // Global state
         let currentUser = null;
         let currentToken = null;
         let currentSteps = 0;
         let currentCredits = 0;
+        
+        // Initialize Google OAuth
+        function initGoogleOAuth() {
+            // The new Google Identity Services is already loaded via the script tag
+            console.log('Google OAuth initialized');
+        }
+        
+        // Load Google OAuth script
+        function loadGoogleOAuth() {
+            // Google Identity Services is already loaded via the script tag in the head
+            console.log('Google OAuth script loaded');
+        }
         
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
@@ -716,6 +729,7 @@
         
         // Authentication functions
         function handleGoogleSignIn(response) {
+            console.log('Google sign-in response:', response);
             authenticateWithBackend('google', response);
         }
         
@@ -725,8 +739,17 @@
         
         async function authenticateWithBackend(type, googleResponse = null) {
             try {
-                const endpoint = type === 'google' ? '/auth/google' : '/auth/guest';
-                const body = type === 'google' ? { credential: googleResponse.credential } : {};
+                let endpoint, body;
+                
+                if (type === 'google') {
+                    endpoint = '/auth/google';
+                    // Handle both old and new Google OAuth response formats
+                    const idToken = googleResponse.credential || googleResponse.id_token || googleResponse.token;
+                    body = { idToken: idToken };
+                } else {
+                    endpoint = '/auth/guest';
+                    body = { deviceId: 'web-guest-' + Date.now() };
+                }
                 
                 const response = await fetch(API_BASE + endpoint, {
                     method: 'POST',
@@ -735,6 +758,7 @@
                 });
                 
                 const data = await response.json();
+                console.log('Backend response:', data);
                 
                 if (data.success) {
                     currentUser = data.user;

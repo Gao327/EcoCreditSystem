@@ -18,6 +18,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/*.html", "/static/**", "/css/**", "/js/**", "/images/**").permitAll()
+                .requestMatchers("/uploads/**").permitAll()  // Allow access to uploaded files
                 .anyRequest().authenticated()
             )
             .headers(headers -> headers.frameOptions().disable()); // For H2 console
