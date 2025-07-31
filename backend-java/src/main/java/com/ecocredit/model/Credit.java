@@ -43,4 +43,9 @@ public class Credit {
         this.type = type;
         this.source = source;
     }
+    
+    // Explicit getter for amount (in case Lombok doesn't work properly)
+    public Integer getAmount() {
+        return amount;
+    }
 } 

@@ -100,4 +100,14 @@ public class User {
     
     public List<Achievement> getAchievements() { return achievements; }
     public void setAchievements(List<Achievement> achievements) { this.achievements = achievements; }
+    
+    // Business Logic Methods
+    public Integer getTotalCredits() {
+        if (credits == null || credits.isEmpty()) {
+            return 0;
+        }
+        return credits.stream()
+                .mapToInt(credit -> credit.getAmount())
+                .sum();
+    }
 } 

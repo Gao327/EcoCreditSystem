@@ -12,11 +12,17 @@ interface UserProfile {
 }
 
 interface User {
-  id: string;
-  email: string;
+  id: number;
   username: string;
-  profile: UserProfile;
-  isAuthenticated: boolean;
+  email: string;
+  isGuest: boolean;
+  lastLogin: string;
+  profile?: UserProfile;
+  credits?: {
+    availableCredits: number;
+    lifetimeEarned: number;
+    lifetimeSpent: number;
+  };
 }
 
 interface UserState {
@@ -26,17 +32,7 @@ interface UserState {
 }
 
 const initialState: UserState = {
-  user: {
-    id: 'demo_user',
-    email: 'demo@stepcredit.com',
-    username: 'Demo User',
-    profile: {
-      firstName: 'Demo',
-      lastName: 'User',
-      activityLevel: 'moderate'
-    },
-    isAuthenticated: true
-  },
+  user: null,
   loading: false,
   error: null,
 };
@@ -56,8 +52,13 @@ const userSlice = createSlice({
       state.loading = false;
       state.error = null;
     },
+    updateUser: (state, action: PayloadAction<User>) => {
+      state.user = action.payload;
+      state.loading = false;
+      state.error = null;
+    },
     updateProfile: (state, action: PayloadAction<Partial<UserProfile>>) => {
-      if (state.user) {
+      if (state.user && state.user.profile) {
         state.user.profile = { ...state.user.profile, ...action.payload };
       }
     },
@@ -78,6 +79,7 @@ const userSlice = createSlice({
 export const {
   setLoading,
   setUser,
+  updateUser,
   updateProfile,
   setError,
   clearError,

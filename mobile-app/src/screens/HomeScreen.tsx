@@ -28,6 +28,7 @@ import { updateSteps, setLoading } from '../store/slices/stepSlice';
 import { updateCredits } from '../store/slices/creditSlice';
 import { getCurrentSteps, syncStepsToServer } from '../services/StepTrackingService';
 import { convertStepsToCredits, getUserBalance } from '../services/CreditService';
+import { checkNetworkStatus } from '../services/NetworkService';
 
 const { width } = Dimensions.get('window');
 
@@ -40,12 +41,14 @@ const HomeScreen: React.FC = () => {
   
   const [refreshing, setRefreshing] = useState(false);
   const [progressAnimation] = useState(new Animated.Value(0));
+  const [isOffline, setIsOffline] = useState(false);
 
   const DAILY_GOAL = 10000;
   const progress = Math.min(steps / DAILY_GOAL, 1);
 
   useEffect(() => {
     loadInitialData();
+    checkBackendStatus();
     
     // Set up step tracking interval
     const interval = setInterval(async () => {
@@ -62,7 +65,17 @@ const HomeScreen: React.FC = () => {
       duration: 1000,
       useNativeDriver: false,
     }).start();
-  }, [progress]);
+  }, [progress, progressAnimation]);
+
+  const checkBackendStatus = async () => {
+    try {
+      const networkStatus = await checkNetworkStatus();
+      setIsOffline(!networkStatus.isBackendReachable);
+    } catch (error) {
+      console.error('Error checking backend status:', error);
+      setIsOffline(true);
+    }
+  };
 
   const loadInitialData = async () => {
     dispatch(setLoading(true));
@@ -147,6 +160,20 @@ const HomeScreen: React.FC = () => {
         />
       }
     >
+      {/* Offline Indicator */}
+      {isOffline && (
+        <Card style={[styles.offlineCard, { backgroundColor: '#fff3cd', borderColor: '#ffeaa7' }]}>
+          <Card.Content>
+            <View style={styles.offlineContainer}>
+              <Ionicons name="wifi-outline" size={20} color="#856404" />
+              <Text style={styles.offlineText}>
+                Offline Mode - Backend not connected
+              </Text>
+            </View>
+          </Card.Content>
+        </Card>
+      )}
+
       {/* Main Step Counter Card */}
       <Surface style={[styles.mainCard, { backgroundColor: theme.colors.surface }]}>
         <LinearGradient
@@ -154,12 +181,12 @@ const HomeScreen: React.FC = () => {
           style={styles.gradientCard}
         >
           <View style={styles.stepCounterContainer}>
-            <Text style={styles.stepCounterTitle}>Today's Steps</Text>
+            <Text style={styles.stepCounterTitle}>EcoCredit Balance</Text>
             <Text style={styles.stepCounterNumber}>
-              {steps.toLocaleString()}
+              {balance?.availableCredits?.toLocaleString() || '0'}
             </Text>
             <Text style={styles.stepCounterSubtitle}>
-              {getMotivationalMessage()}
+              {steps.toLocaleString()} steps today
             </Text>
           </View>
         </LinearGradient>
@@ -185,13 +212,13 @@ const HomeScreen: React.FC = () => {
             </View>
           </View>
           
-          <Animated.View style={styles.progressBarContainer}>
+          <View style={styles.progressBarContainer}>
             <ProgressBar
-              progress={progressAnimation}
+              progress={progress}
               color={theme.colors.primary}
               style={styles.progressBar}
             />
-          </Animated.View>
+          </View>
           
           <View style={styles.goalContainer}>
             <Text style={styles.goalText}>Goal: {DAILY_GOAL.toLocaleString()} steps</Text>
@@ -205,14 +232,14 @@ const HomeScreen: React.FC = () => {
           <View style={styles.creditsHeader}>
             <View style={styles.creditsInfo}>
               <Title style={styles.creditsTitle}>
-                <Ionicons name="diamond" size={20} color={theme.colors.primary} />
-                {' '}Credits
+                <Ionicons name="leaf" size={20} color={theme.colors.primary} />
+                {' '}Steps to Credits
               </Title>
               <Text style={styles.creditsBalance}>
-                {balance?.availableCredits?.toLocaleString() || '0'}
+                {steps.toLocaleString()}
               </Text>
               <Paragraph style={styles.creditsSubtext}>
-                Available Credits
+                Steps Available to Convert
               </Paragraph>
             </View>
             <View style={styles.creditsActions}>
@@ -234,7 +261,7 @@ const HomeScreen: React.FC = () => {
       {/* Today's Stats */}
       <Card style={styles.card}>
         <Card.Content>
-          <Title style={styles.statsTitle}>Today's Activity</Title>
+          <Title style={styles.statsTitle}>EcoCredit Activity</Title>
           <View style={styles.statsGrid}>
             <View style={styles.statItem}>
               <Ionicons name="footsteps" size={24} color={theme.colors.primary} />
@@ -272,24 +299,24 @@ const HomeScreen: React.FC = () => {
       {/* Quick Actions */}
       <Card style={[styles.card, styles.lastCard]}>
         <Card.Content>
-          <Title style={styles.actionsTitle}>Quick Actions</Title>
+          <Title style={styles.actionsTitle}>EcoCredit Actions</Title>
           <View style={styles.actionButtons}>
             <Button
               mode="outlined"
-              onPress={() => {/* Navigate to challenges */}}
+              onPress={() => {/* Navigate to rewards */}}
               style={styles.actionButton}
-              icon="trophy"
+              icon="gift"
             >
-              Challenges
+              Browse Rewards
             </Button>
-            <Button
-              mode="outlined"
-              onPress={() => {/* Navigate to achievements */}}
-              style={styles.actionButton}
-              icon="star"
-            >
-              Achievements
-            </Button>
+                          <Button
+                mode="outlined"
+                onPress={() => {/* Navigate to profile */}}
+                style={styles.actionButton}
+                icon="person"
+              >
+                View Profile
+              </Button>
           </View>
         </Card.Content>
       </Card>
@@ -456,6 +483,22 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 4,
     borderRadius: 20,
+  },
+  offlineCard: {
+    marginBottom: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  offlineContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  offlineText: {
+    marginLeft: 8,
+    fontSize: 14,
+    color: '#856404',
+    fontWeight: '500',
   },
 });
 
